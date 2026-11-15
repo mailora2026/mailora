@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="ru" class="antialiased">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>mailora.com</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='15%25' y1='85%25' x2='85%25' y2='15%25'%3E%3Cstop offset='0%25' stop-color='%234A0718'/%3E%3Cstop offset='55%25' stop-color='%237D102D'/%3E%3Cstop offset='100%25' stop-color='%239E173B'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='%23FFFFFF' stroke='url(%23g)' stroke-width='6'/%3E%3Cpath d='M25 32.5 C26.3 30.8 28.4 30 30.8 30 H69.2 C71.6 30 73.7 30.8 75 32.5 L50 51.5 Z' fill='url(%23g)'/%3E%3Cpath d='M23 36.2 L50 56.8 L77 36.2 V62.5 C77 66.6 73.6 70 69.5 70 H62 V53 L50 62 L38 53 V70 H30.5 C26.4 70 23 66.6 23 62.5 Z' fill='url(%23g)'/%3E%3C/svg%3E" />
+
+  <!-- Подключение шрифтов Inter и Manrope с поддержкой кириллицы и латиницы -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Конфигурация палитры и типографики -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            burgundy: {
+              DEFAULT: '#6B1D2F',
+              light: '#8A243C',
+              dark: '#521322',
+              tint: '#FDF7F8',
+              border: '#E8D5D9'
+            },
+            surface: {
+              base: '#FAFAFA',
+              card: '#FFFFFF',
+              border: '#EAEAEA'
+            },
+            ink: {
+              primary: '#1A1A1A',
+              secondary: '#666666',
+              muted: '#999999'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            display: ['Manrope', 'Inter', 'sans-serif']
+          },
+          boxShadow: {
+            'card': '0 10px 35px -10px rgba(26, 26, 26, 0.05), 0 1px 4px rgba(26, 26, 26, 0.03)',
+            'modal': '0 24px 60px -15px rgba(26, 26, 26, 0.14)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Плавные базовые переходы и кастомный скроллбар */
+    html, body {
+      background-color: #FAFAFA;
+      color: #1A1A1A;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .font-display {
+      font-family: 'Manrope', 'Inter', sans-serif;
+    }
+
+    /* Убираем стандартные стрелки и подсветки браузера */
+    input:focus, textarea:focus, button:focus-visible {
+      outline: none;
+    }
+
+    /* Адаптация под вырезы экранов современных смартфонов и планшетов */
+    .safe-top {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+
+    .safe-bottom {
+      padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+    }
+
+    /* Скрытие полосы прокрутки в горизонтальном меню папок на мобильных */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Анимация появления вкладок и модальных окон */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-up {
+      animation: fadeSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-[100dvh] flex flex-col justify-between bg-surface-base text-ink-primary selection:bg-burgundy selection:text-white">
+
+  <!-- =====================================================================
+       1. ЭКРАН АВТОРИЗАЦИИ И РЕГИСТРАЦИИ (LANDING & AUTH VIEW)
+       ===================================================================== -->
+  <div id="auth-screen" class="min-h-[100dvh] flex flex-col justify-between transition-opacity duration-200">
+    
+    <!-- Верхняя панель навигации -->
+    <header class="w-full max-w-6xl mx-auto px-4 sm:px-8 lg:px-10 safe-top pb-3 sm:pb-4 flex items-center justify-between">
+      <!-- Логотип mailora.com -->
+      <a href="#" onclick="resetToAuth(event)" class="inline-flex items-center gap-2 sm:gap-2.5 group py-1" aria-label="mailora.com">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 transition-transform duration-200 group-hover:scale-105">
+          <!-- Векторная версия фирменного логотипа mailora.com -->
+          <svg class="w-full h-full drop-shadow-2xs" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="mailora-ring-1" x1="15%" y1="85%" x2="85%" y2="15%">
+                <stop offset="0%" stop-color="#450616" />
+                <stop offset="55%" stop-color="#7C0F2C" />
+                <stop offset="100%" stop-color="#A1183D" />
+              </linearGradient>
+              <linearGradient id="mailora-top-1" x1="20%" y1="20%" x2="80%" y2="30%">
+                <stop offset="0%" stop-color="#5E0A20" />
+                <stop offset="60%" stop-color="#8A1232" />
+                <stop offset="100%" stop-color="#A6193F" />
+              </linearGradient>
+              <linearGradient id="mailora-body-1" x1="15%" y1="85%" x2="85%" y2="25%">
+                <stop offset="0%" stop-color="#470617" />
+                <stop offset="50%" stop-color="#780E2B" />
+                <stop offset="100%" stop-color="#9C163A" />
+              </linearGradient>
+              <linearGradient id="mailora-fold-1" x1="50%" y1="45%" x2="50%" y2="90%">
+                <stop offset="0%" stop-color="#3B0412" />
+                <stop offset="100%" stop-color="#5C091F" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45.5" fill="#FFFFFF" stroke="url(#mailora-ring-1)" stroke-width="5.5" />
+            <path d="M24.6 32.6 C25.9 30.9 28.1 30 30.6 30 H69.4 C71.9 30 74.1 30.9 75.4 32.6 L50 51.8 Z" fill="url(#mailora-top-1)" />
+            <path d="M23 36.4 L50 56.8 L77 36.4 V62.2 C77 66.5 73.5 70 69.2 70 H62 V53.2 L50 62.2 L38 53.2 V70 H30.8 C26.5 70 23 66.5 23 62.2 Z" fill="url(#mailora-body-1)" />
+            <path d="M24.5 67.5 L42 50.8 L50 56.8 L58 50.8 L75.5 67.5 C74.1 69.1 71.8 70 69.2 70 H62 V53.2 L50 62.2 L38 53.2 V70 H30.8 C28.2 70 25.9 69.1 24.5 67.5 Z" fill="url(#mailora-fold-1)" opacity="0.65" />
+          </svg>
+        </div>
+        <span class="font-display font-bold text-base sm:text-lg tracking-tight text-ink-primary">mailora<span class="text-burgundy">.com</span></span>
+      </a>
+
+      <!-- Переключатель языков RU | EN (увеличенная область касания для смартфонов/планшетов) -->
+      <div class="inline-flex items-center bg-white border border-surface-border rounded-xl p-1 text-xs font-medium shadow-2xs" role="group" aria-label="Language switcher">
+        <button type="button" id="lang-btn-ru" onclick="setLanguage('ru')" class="min-w-[38px] px-2.5 py-1.5 rounded-lg transition-all duration-150 bg-burgundy text-white font-semibold cursor-pointer">
+          RU
+        </button>
+        <button type="button" id="lang-btn-en" onclick="setLanguage('en')" class="min-w-[38px] px-2.5 py-1.5 rounded-lg transition-all duration-150 text-ink-secondary hover:text-ink-primary cursor-pointer">
+          EN
+        </button>
+      </div>
+    </header>
+
+    <!-- Центральный блок: Адаптивная ширина для телефонов, планшетов и ПК -->
+    <main class="w-full max-w-[400px] sm:max-w-[430px] lg:max-w-[440px] mx-auto px-4 sm:px-6 my-auto py-4 sm:py-8">
+      
+      <!-- Лаконичный заголовок бренда с фирменным знаком -->
+      <div class="text-center mb-5 sm:mb-7">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-3.5">
+          <svg class="w-full h-full drop-shadow-xs" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="mailora-ring-hero" x1="15%" y1="85%" x2="85%" y2="15%">
+                <stop offset="0%" stop-color="#450616" />
+                <stop offset="55%" stop-color="#7C0F2C" />
+                <stop offset="100%" stop-color="#A1183D" />
+              </linearGradient>
+              <linearGradient id="mailora-top-hero" x1="20%" y1="20%" x2="80%" y2="30%">
+                <stop offset="0%" stop-color="#5E0A20" />
+                <stop offset="60%" stop-color="#8A1232" />
+                <stop offset="100%" stop-color="#A6193F" />
+              </linearGradient>
+              <linearGradient id="mailora-body-hero" x1="15%" y1="85%" x2="85%" y2="25%">
+                <stop offset="0%" stop-color="#470617" />
+                <stop offset="50%" stop-color="#780E2B" />
+                <stop offset="100%" stop-color="#9C163A" />
+              </linearGradient>
+              <linearGradient id="mailora-fold-hero" x1="50%" y1="45%" x2="50%" y2="90%">
+                <stop offset="0%" stop-color="#3B0412" />
+                <stop offset="100%" stop-color="#5C091F" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45.5" fill="#FFFFFF" stroke="url(#mailora-ring-hero)" stroke-width="5.5" />
+            <path d="M24.6 32.6 C25.9 30.9 28.1 30 30.6 30 H69.4 C71.9 30 74.1 30.9 75.4 32.6 L50 51.8 Z" fill="url(#mailora-top-hero)" />
+            <path d="M23 36.4 L50 56.8 L77 36.4 V62.2 C77 66.5 73.5 70 69.2 70 H62 V53.2 L50 62.2 L38 53.2 V70 H30.8 C26.5 70 23 66.5 23 62.2 Z" fill="url(#mailora-body-hero)" />
+            <path d="M24.5 67.5 L42 50.8 L50 56.8 L58 50.8 L75.5 67.5 C74.1 69.1 71.8 70 69.2 70 H62 V53.2 L50 62.2 L38 53.2 V70 H30.8 C28.2 70 25.9 69.1 24.5 67.5 Z" fill="url(#mailora-fold-hero)" opacity="0.65" />
+          </svg>
+        </div>
+        <h1 class="font-display text-2xl sm:text-[28px] lg:text-[30px] font-bold tracking-tight text-ink-primary leading-tight">
+          mailora.com
+        </h1>
+      </div>
+
+      <!-- Карточка входа и регистрации -->
+      <div class="bg-surface-card border border-surface-border rounded-2xl shadow-card p-5 sm:p-7 lg:p-8">
+        
+        <!-- Переключатель вкладок: Вход / Регистрация -->
+        <div class="grid grid-cols-2 gap-1 p-1 bg-surface-base border border-surface-border rounded-xl mb-5 sm:mb-6" role="tablist">
+          <button type="button" id="tab-login" role="tab" aria-selected="true" onclick="switchAuthTab('login')"
+            class="py-2.5 sm:py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-white text-ink-primary shadow-2xs cursor-pointer"
+            data-i18n="tabLogin">
+            Вход
+          </button>
+          <button type="button" id="tab-register" role="tab" aria-selected="false" onclick="switchAuthTab('register')"
+            class="py-2.5 sm:py-2 text-sm font-medium rounded-lg transition-all duration-150 text-ink-secondary hover:text-ink-primary cursor-pointer"
+            data-i18n="tabRegister">
+            Регистрация
+          </button>
+        </div>
+
+        <!-- Встроенное уведомление об ошибке или статусе -->
+        <div id="auth-alert" class="hidden mb-4 px-3.5 py-2.5 rounded-xl text-xs font-medium border animate-fade-up"></div>
+
+        <!-- ФОРМА ВХОДА (SIGN IN) -->
+        <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4 animate-fade-up" novalidate>
+          <div>
+            <label for="login-username" class="block text-xs font-medium text-ink-secondary mb-1.5" data-i18n="labelEmail">
+              Почтовый ящик
+            </label>
+            <div class="flex items-center rounded-xl border border-surface-border bg-white focus-within:border-burgundy focus-within:ring-2 focus-within:ring-burgundy/10 transition-all overflow-hidden">
+              <input
+                type="text"
+                id="login-username"
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
+                data-i18n-placeholder="placeholderUsername"
+                placeholder="имя"
+                class="w-full min-w-0 px-3.5 py-3 sm:py-2.5 text-base sm:text-sm text-ink-primary placeholder:text-ink-muted bg-transparent"
+                required
+              />
+              <span class="pr-3.5 pl-1 text-xs sm:text-sm text-ink-secondary select-none font-normal shrink-0">@mailora.com</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="login-password" class="block text-xs font-medium text-ink-secondary" data-i18n="labelPassword">
+                Пароль
+              </label>
+              <button type="button" onclick="openModal('forgot')" class="text-xs text-burgundy hover:text-burgundy-dark transition-colors font-medium py-0.5 cursor-pointer" data-i18n="forgotPassword">
+                Забыли пароль?
+              </button>
+            </div>
+            <div class="relative flex items-center rounded-xl border border-surface-border bg-white focus-within:border-burgundy focus-within:ring-2 focus-within:ring-burgundy/10 transition-all">
+              <input
+                type="password"
+                id="login-password"
+                autocomplete="current-password"
+                data-i18n-placeholder="placeholderPassword"
+                placeholder="••••••••"
+                class="w-full pl-3.5 pr-11 py-3 sm:py-2.5 text-base sm:text-sm text-ink-primary placeholder:text-ink-muted bg-transparent"
+                required
+              />
+              <button type="button" onclick="togglePasswordVisibility('login-password', this)" aria-label="Toggle password" class="absolute right-2 text-ink-muted hover:text-ink-primary transition-colors p-2 cursor-pointer">
+                <svg class="w-4 h-4 eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full mt-2 py-3 sm:py-2.5 px-4 rounded-xl bg-burgundy hover:bg-burgundy-dark active:scale-[0.99] text-white text-sm font-medium transition-all duration-150 shadow-2xs cursor-pointer" data-i18n="btnSignIn">
+            Войти
+          </button>
+        </form>
+
+        <!-- ФОРМА РЕГИСТРАЦИИ (CREATE ACCOUNT) -->
+        <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="hidden space-y-4 animate-fade-up" novalidate>
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <label for="reg-username" class="block text-xs font-medium text-ink-secondary shrink-0" data-i18n="labelNewEmail">
+                Новый адрес
+              </label>
+              <!-- Индикатор доступности имени в реальном времени -->
+              <span id="username-status" class="text-[11px] font-medium transition-opacity duration-150 truncate text-right"></span>
+            </div>
+            <div class="flex items-center rounded-xl border border-surface-border bg-white focus-within:border-burgundy focus-within:ring-2 focus-within:ring-burgundy/10 transition-all overflow-hidden">
+              <input
+                type="text"
+                id="reg-username"
+                oninput="checkUsernameAvailability(this.value)"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                data-i18n-placeholder="placeholderNewUsername"
+                placeholder="alexey"
+                class="w-full min-w-0 px-3.5 py-3 sm:py-2.5 text-base sm:text-sm text-ink-primary placeholder:text-ink-muted bg-transparent"
+                required
+              />
+              <span class="pr-3.5 pl-1 text-xs sm:text-sm text-ink-secondary select-none font-normal shrink-0">@mailora.com</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="reg-password" class="block text-xs font-medium text-ink-secondary mb-1.5" data-i18n="labelPassword">
+              Пароль
+            </label>
+            <div class="relative flex items-center rounded-xl border border-surface-border bg-white focus-within:border-burgundy focus-within:ring-2 focus-within:ring-burgundy/10 transition-all">
+              <input
+                type="password"
+                id="reg-password"
+                autocomplete="new-password"
+                data-i18n-placeholder="placeholderMinPassword"
+                placeholder="Минимум 6 символов"
+                class="w-full pl-3.5 pr-11 py-3 sm:py-2.5 text-base sm:text-sm text-ink-primary placeholder:text-ink-muted bg-transparent"
+                required
+              />
+              <button type="button" onclick="togglePasswordVisibility('reg-password', this)" aria-label="Toggle password" class="absolute right-2 text-ink-muted hover:text-ink-primary transition-colors p-2 cursor-pointer">
+                <svg class="w-4 h-4 eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label for="reg-password-confirm" class="block text-xs font-medium text-ink-secondary mb-1.5" data-i18n="labelConfirmPassword">
+              Повторите пароль
+            </label>
+            <div class="relative flex items-center rounded-xl border border-surface-border bg-white focus-within:border-burgundy focus-within:ring-2 focus-within:ring-burgundy/10 transition-all">
+              <input
+                type="password"
+                id="reg-password-confirm"
+                autocomplete="new-password"
+                data-i18n-placeholder="placeholderPassword"
+                placeholder="••••••••"
+                class="w-full pl-3.5 pr-10 py-3 sm:py-2.5 text-base sm:text-sm text-ink-primary placeholder:text-ink-muted bg-transparent"
+                required
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="w-full mt-2 py-3 sm:py-2.5 px-4 rounded-xl bg-burgundy hover:bg-burgundy-dark active:scale-[0.99] text-white text-sm font-medium transition-all duration-150 shadow-2xs cursor-pointer" data-i18n="btnCreateAccount">
+            Создать почту
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <!-- Минималистичный футер -->
+    <footer class="w-full max-w-6xl mx-auto px-4 sm:px-8 lg:px-10 pt-4 safe-bottom flex flex-col-reverse sm:flex-row items-center justify-between gap-3 text-xs text-ink-secondary">
+      <div>© 2026 mailora.com</div>
+      <nav class="flex flex-wrap items-center justify-center gap-4 sm:gap-6" aria-label="Footer navigation">
+        <button type="button" onclick="openModal('privacy')" class="hover:text-ink-primary transition-colors py-1 cursor-pointer" data-i18n="footerPrivacy">
+          Конфиденциальность
+        </button>
+        <button type="button" onclick="openModal('terms')" class="hover:text-ink-primary transition-colors py-1 cursor-pointer" data-i18n="footerTerms">
+          Условия
+        </button>
+        <button type="button" onclick="openModal('support')" class="hover:text-ink-primary transition-colors py-1 cursor-pointer" data-i18n="footerSupport">
+          Помощь
+        </button>
+      </nav>
+    </footer>
+  </div>
+
+
+  <!-- =====================================================================
+       2. МИНИМАЛИСТИЧНЫЙ ВЕБ-КЛИЕНТ ПОЧТЫ (WEBMAIL INBOX PREVIEW)
+       ===================================================================== -->
+  <div id="webmail-screen" class="hidden min-h-[100dvh] flex-col bg-surface-base animate-fade-up">
+    
+    <!-- Верхняя панель веб-почты -->
+    <header class="bg-white border-b border-surface-border px-4 sm:px-6 lg:px-8 min-h-14 py-2 flex items-center justify-between sticky top-0 z-20">
+      <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+        <div class="w-8 h-8 shrink-0">
+          <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="mailora-ring-wm" x1="15%" y1="85%" x2="85%" y2="15%">
+                <stop offset="0%" stop-color="#450616" />
+                <stop offset="55%" stop-color="#7C0F2C" />
+                <stop offset="100%" stop-color="#A1183D" />
+              </linearGradient>
+              <linearGradient id="mailora-top-wm" x1="20%" y1="20%" x2="80%" y2="30%">
+                <stop offset="0%" stop-color="#5E0A20" />
+                <stop offset="60%" stop-color="#8A1232" />
+                <stop offset="100%" stop-color="#A6193F" />
+              </linearGradient>
+              <linearGradient id="mailora-body-wm" x1="15%" y1="85%" x2="85%" y2="25%">
+                <stop offset="0%" stop-color="#470617" />
+                <stop offset="50%" stop-color="#780E2B" />
+                <stop offset="100%" stop-color="#9C163A" />
+              </linearGradient>
+              <linearGradient id="mailora-fold-wm" x1="50%" y1="45%" x2="50%" y2="90%">
+                <stop offset="0%" stop-color="#3B0412" />
+                <stop offset="100%" stop-color="#5C091F" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45.5" fill="#FFFFFF" stroke="url(#mailora-ring-wm)" stroke-width="5.5" />
+            <path d="M24.6 32.6 C25.9 30.9 28.1 30 30.6 30 H69.4 C71.9 30 74.1 30.9 75.4 32.6 L50 51.8 Z" fill="url(#mailora-top-wm)" />
+            <path d="M23 36.4 L50 56.8 L77 36.4 V62.2 C77 66.5 73.5 70 69.2 70 H62 V53.2 L50 62.2 L38 53.2 V70 H30.8 C26.5 70 23 66.5 23 62.2 Z" fill="url(#mailora-body-wm)" />
+            <path d="M24.5 67.5 L42 50.8 L50 56.8 L58 50.8 L75.5 67.5 C74.1 69.1 71.8 70 69.2 70 H62 V53.2 L50 62.2 L38 53.2 V70 H30.8 C28.2 70 25.9 69.1 24.5 67.5 Z" fill="url(#mailora-fold-wm)" opacity="0.65" />
+          </svg>
+        <span class="font-display font-bold text-base tracking-tight text-ink-primary truncate">mailora<span class="text-burgundy">.com</span></span>
+      </div>
+
+      <!-- Правая часть: Текущий адрес, язык, выход -->
+      <div class="flex items-center gap-2 sm:gap-3.5 shrink-0">
+        <span id="active-user-email" class="hidden md:inline-block max-w-[220px] truncate text-xs font-medium text-ink-secondary bg-surface-base px-3 py-1.5 rounded-lg border border-surface-border">
+          user@mailora.com
+        </span>
+
+        <!-- Переключатель языков RU | EN -->
+        <div class="inline-flex items-center bg-surface-base border border-surface-border rounded-lg p-0.5 text-xs font-medium">
+          <button type="button" id="wm-lang-btn-ru" onclick="setLanguage('ru')" class="px-2.5 py-1 rounded-md transition-all duration-150 bg-burgundy text-white font-semibold cursor-pointer">
+            RU
+          </button>
+          <button type="button" id="wm-lang-btn-en" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-md transition-all duration-150 text-ink-secondary hover:text-ink-primary cursor-pointer">
+            EN
+          </button>
+        </div>
+
+        <button type="button" onclick="logoutUser()" aria-label="Sign out" class="inline-flex items-center gap-1.5 text-xs font-medium text-ink-secondary hover:text-burgundy px-2.5 py-2 rounded-lg hover:bg-burgundy-tint transition-colors cursor-pointer">
+          <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span class="hidden sm:inline" data-i18n="btnLogout">Выйти</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Рабочая область почты: Адаптивная сетка для смартфонов, планшетов (md) и десктопов (lg/xl) -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 safe-bottom grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5 lg:gap-6">
+      
+      <!-- Левый сайдбар (на телефонах — компактная панель сверху, на планшетах и ПК — боковая колонка) -->
+      <aside class="md:col-span-4 lg:col-span-3 xl:col-span-2 flex flex-col gap-3">
+        <button type="button" onclick="openComposeModal()" class="w-full py-2.5 px-4 rounded-xl bg-burgundy hover:bg-burgundy-dark active:scale-[0.99] text-white text-sm font-medium transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span data-i18n="btnCompose">Написать</span>
+        </button>
+
+        <nav class="flex md:flex-col gap-1.5 overflow-x-auto no-scrollbar pb-0.5 md:pb-0" aria-label="Mail folders">
+          <button type="button" id="folder-inbox" onclick="selectFolder('inbox')" class="shrink-0 flex-1 md:flex-none flex items-center justify-between gap-2 px-3 py-2.5 md:py-2 rounded-xl text-xs sm:text-sm font-medium bg-burgundy-tint text-burgundy border border-burgundy-border/60 transition-colors cursor-pointer">
+            <span class="flex items-center gap-2 sm:gap-2.5">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+              </svg>
+              <span data-i18n="folderInbox">Входящие</span>
+            </span>
+            <span id="inbox-count" class="text-[11px] sm:text-xs font-semibold px-1.5 py-0.5 rounded-md bg-burgundy text-white">3</span>
+          </button>
+
+          <button type="button" id="folder-sent" onclick="selectFolder('sent')" class="shrink-0 flex-1 md:flex-none flex items-center justify-between gap-2 px-3 py-2.5 md:py-2 rounded-xl text-xs sm:text-sm font-medium text-ink-secondary hover:bg-white hover:text-ink-primary transition-colors cursor-pointer">
+            <span class="flex items-center gap-2 sm:gap-2.5">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              <span data-i18n="folderSent">Отправленные</span>
+            </span>
+            <span id="sent-count" class="text-xs text-ink-muted">0</span>
+          </button>
+
+          <button type="button" id="folder-drafts" onclick="selectFolder('drafts')" class="shrink-0 flex-1 md:flex-none flex items-center justify-between gap-2 px-3 py-2.5 md:py-2 rounded-xl text-xs sm:text-sm font-medium text-ink-secondary hover:bg-white hover:text-ink-primary transition-colors cursor-pointer">
+            <span class="flex items-center gap-2 sm:gap-2.5">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <span data-i18n="folderDrafts">Черновики</span>
+            </span>
+            <span class="text-xs text-ink-muted">0</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Список писем и область чтения -->
+      <section class="md:col-span-8 lg:col-span-9 xl:col-span-10 bg-white border border-surface-border rounded-2xl shadow-card overflow-hidden flex flex-col min-h-[420px] sm:min-h-[520px] lg:min-h-[580px]">
+        <!-- Заголовок текущей папки -->
+        <div class="px-4 sm:px-5 py-3.5 border-b border-surface-border flex items-center justify-between gap-2 bg-white">
+          <h2 id="current-folder-title" class="font-display font-semibold text-sm text-ink-primary" data-i18n="folderInbox">
+            Входящие
+          </h2>
+          <span id="mobile-active-email" class="md:hidden text-[11px] text-ink-muted truncate max-w-[180px]"></span>
+          <span class="hidden md:inline text-xs text-ink-muted">mailora.com</span>
+        </div>
+
+        <!-- Контейнер писем -->
+        <div id="mail-list-container" class="divide-y divide-surface-border flex-1"></div>
+
+        <!-- Просмотр выбранного письма -->
+        <div id="mail-reader-container" class="hidden p-4 sm:p-6 lg:p-8 flex-1 flex-col justify-between animate-fade-up">
+          <div>
+            <button type="button" onclick="closeMailReader()" class="inline-flex items-center gap-1.5 text-xs font-medium text-ink-secondary hover:text-burgundy mb-4 sm:mb-5 py-1 transition-colors cursor-pointer">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span data-i18n="btnBackToList">Назад к списку</span>
+            </button>
+
+            <h3 id="reader-subject" class="font-display text-base sm:text-lg lg:text-xl font-bold text-ink-primary mb-3"></h3>
+            
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-surface-border text-xs">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div id="reader-avatar" class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-full bg-burgundy-tint text-burgundy border border-burgundy-border flex items-center justify-center font-semibold">
+                  M
+                </div>
+                <div class="min-w-0">
+                  <div id="reader-sender" class="font-semibold text-ink-primary truncate"></div>
+                  <div id="reader-email" class="text-ink-secondary truncate"></div>
+                </div>
+              </div>
+              <div id="reader-time" class="text-ink-muted shrink-0"></div>
+            </div>
+
+            <div id="reader-body" class="text-sm text-ink-primary leading-relaxed whitespace-pre-line max-w-3xl"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       3. МОДАЛЬНЫЕ ОКНА (ИНФО / ВОССТАНОВЛЕНИЕ ПАРОЛЯ / НОВОЕ ПИСЬМО)
+       ===================================================================== -->
+  <div id="modal-backdrop" onclick="closeModalOnBackdrop(event)" class="hidden fixed inset-0 z-50 bg-ink-primary/30 backdrop-blur-[2px] flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white border border-surface-border rounded-t-2xl sm:rounded-2xl shadow-modal w-full max-w-md sm:max-w-lg p-5 sm:p-6 safe-bottom animate-fade-up relative max-h-[92dvh] overflow-y-auto">
+      
+      <!-- Кнопка закрытия -->
+      <button type="button" onclick="closeModal()" aria-label="Close" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-ink-muted hover:text-ink-primary p-2 rounded-lg transition-colors cursor-pointer">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Контент информационного модального окна (Privacy / Terms / Support / Forgot) -->
+      <div id="modal-info-content">
+        <h3 id="modal-title" class="font-display text-base sm:text-lg font-bold text-ink-primary pr-8"></h3>
+        <p id="modal-body" class="mt-3 text-sm text-ink-secondary leading-relaxed"></p>
+
+        <!-- Поле для восстановления пароля (показывается только для 'forgot') -->
+        <form id="forgot-form" onsubmit="handleForgotSubmit(event)" class="hidden mt-4 space-y-3">
+          <div class="flex items-center rounded-xl border border-surface-border bg-white focus-within:border-burgundy transition-all overflow-hidden">
+            <input type="text" id="forgot-username" data-i18n-placeholder="placeholderUsername" placeholder="имя" class="w-full min-w-0 px-3.5 py-3 sm:py-2.5 text-base sm:text-sm text-ink-primary" required />
+            <span class="pr-3.5 text-xs sm:text-sm text-ink-secondary select-none shrink-0">@mailora.com</span>
+          </div>
+          <div id="forgot-feedback" class="hidden text-xs text-burgundy font-medium"></div>
+          <button type="submit" class="w-full py-3 sm:py-2.5 px-4 rounded-xl bg-burgundy hover:bg-burgundy-dark text-white text-sm font-medium transition-colors cursor-pointer" data-i18n="btnSendReset">
+            Отправить код восстановления
+          </button>
+        </form>
+
+        <div id="modal-close-footer" class="mt-6 flex justify-end">
+          <button type="button" onclick="closeModal()" class="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-surface-base hover:bg-surface-border/60 text-xs font-medium text-ink-primary transition-colors cursor-pointer" data-i18n="btnClose">
+            Закрыть
+          </button>
+        </div>
+      </div>
+
+      <!-- Контент модального окна создания письма (Compose) -->
+      <div id="modal-compose-content" class="hidden">
+        <h3 class="font-display text-base sm:text-lg font-bold text-ink-primary mb-4 pr-8" data-i18n="composeTitle">Новое письмо</h3>
+        <form onsubmit="handleSendMail(event)" class="space-y-3">
+          <div>
+            <input type="email" id="compose-to" data-i18n-placeholder="composeTo" placeholder="Кому (example@mailora.com)" class="w-full px-3.5 py-3 sm:py-2.5 text-base sm:text-sm rounded-xl border border-surface-border focus:border-burgundy transition-colors" required />
+          </div>
+          <div>
+            <input type="text" id="compose-subject" data-i18n-placeholder="composeSubject" placeholder="Тема" class="w-full px-3.5 py-3 sm:py-2.5 text-base sm:text-sm rounded-xl border border-surface-border focus:border-burgundy transition-colors" required />
+          </div>
+          <div>
+            <textarea id="compose-body" rows="5" data-i18n-placeholder="composeBody" placeholder="Текст сообщения..." class="w-full px-3.5 py-3 sm:py-2.5 text-base sm:text-sm rounded-xl border border-surface-border focus:border-burgundy transition-colors resize-none" required></textarea>
+          </div>
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2.5 sm:py-2 rounded-xl text-xs font-medium text-ink-secondary hover:bg-surface-base transition-colors cursor-pointer" data-i18n="btnCancel">
+              Отмена
+            </button>
+            <button type="submit" class="px-5 py-2.5 sm:py-2 rounded-xl bg-burgundy hover:bg-burgundy-dark text-white text-xs font-medium transition-colors cursor-pointer" data-i18n="btnSend">
+              Отправить
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- =====================================================================
+       ЛОГИКА ЛОКАЛИЗАЦИИ, АВТОРИЗАЦИИ И ПОЧТОВОГО ИНТЕРФЕЙСА
+       ===================================================================== -->
+  <script>
+    // Словарь переводов (RU / EN)
+    const i18n = {
+      ru: {
+        pageTitle: 'mailora.com',
+        tabLogin: 'Вход',
+        tabRegister: 'Регистрация',
+        labelEmail: 'Почтовый ящик',
+        labelNewEmail: 'Новый адрес',
+        labelPassword: 'Пароль',
+        labelConfirmPassword: 'Повторите пароль',
+        placeholderUsername: 'имя',
+        placeholderNewUsername: 'alexey',
+        placeholderPassword: '••••••••',
+        placeholderMinPassword: 'Минимум 6 символов',
+        forgotPassword: 'Забыли пароль?',
+        btnSignIn: 'Войти',
+        btnCreateAccount: 'Создать почту',
+        footerPrivacy: 'Конфиденциальность',
+        footerTerms: 'Условия',
+        footerSupport: 'Помощь',
+        btnClose: 'Закрыть',
+        btnCancel: 'Отмена',
+        btnSend: 'Отправить',
+        btnSendReset: 'Отправить код восстановления',
+        btnLogout: 'Выйти',
+        btnCompose: 'Написать',
+        btnBackToList: 'Назад к списку',
+        folderInbox: 'Входящие',
+        folderSent: 'Отправленные',
+        folderDrafts: 'Черновики',
+        composeTitle: 'Новое письмо',
+        composeTo: 'Кому (например, info@mailora.com)',
+        composeSubject: 'Тема письма',
+        composeBody: 'Текст сообщения...',
+        emptyFolder: 'В этой папке пока нет писем',
+        // Статусы проверки имени
+        statusChecking: 'Проверка...',
+        statusAvailable: 'Свободно',
+        statusTaken: 'Занято',
+        statusInvalid: 'Только латиница и цифры (от 3 симв.)',
+        // Ошибки валидации
+        errEmptyLogin: 'Введите имя ящика и пароль.',
+        errInvalidUser: 'Некорректное имя почтового ящика.',
+        errShortPassword: 'Пароль должен содержать минимум 6 символов.',
+        errPasswordMismatch: 'Пароли не совпадают.',
+        errTakenUsername: 'Это имя уже занято. Выберите другое.',
+        forgotSentMsg: 'Инструкция по восстановлению отправлена на резервный контакт.',
+        // Модальные окна
+        modals: {
+          privacy: {
+            title: 'Конфиденциальность',
+            body: 'Все данные пользователей mailora.com хранятся на защищённых серверах в Российской Федерации в строгом соответствии с 152-ФЗ. Мы не сканируем переписку для показа рекламы и используем современное шифрование при передаче и хранении писем.'
+          },
+          terms: {
+            title: 'Условия использования',
+            body: 'Сервис mailora.com предоставляется для личной и деловой переписки. Пользователь обязуется не использовать почтовый ящик для рассылки спама и соблюдать законодательство РФ.'
+          },
+          support: {
+            title: 'Служба поддержки',
+            body: 'Если у вас возникли вопросы по работе почты или восстановлению доступа, напишите нам на адрес support@mailora.com. Среднее время ответа — 15 минут.'
+          },
+          forgot: {
+            title: 'Восстановление доступа',
+            body: 'Укажите имя вашего почтового ящика @mailora.com, чтобы получить одноразовый код подтверждения.'
+          }
+        },
+        // Демо-письма для входящих
+        sampleEmails: [
+          {
+            id: 1,
+            sender: 'Команда mailora.com',
+            email: 'welcome@mailora.com',
+            subject: 'Добро пожаловать в mailora.com',
+            preview: 'Ваш новый почтовый ящик готов к работе. Ничего лишнего — только быстрая и надёжная почта.',
+            body: 'Здравствуйте!\n\nБлагодарим за выбор mailora.com — современной электронной почты для России.\n\nВаш ящик полностью настроен и защищён. Мы убрали всё лишнее, чтобы вы могли сосредоточиться на важном.\n\nС уважением,\nКоманда mailora.com',
+            time: '15:40',
+            unread: true
+          },
+          {
+            id: 2,
+            sender: 'Безопасность mailora',
+            email: 'security@mailora.com',
+            subject: 'Защита вашего аккаунта активна',
+            preview: 'Вход выполнен с нового устройства. Шифрование TLS 1.3 включено по умолчанию.',
+            body: 'Уведомление системы безопасности:\n\nДля вашего аккаунта @mailora.com активировано сквозное транспортное шифрование TLS 1.3 и защита от спама.\n\nЕсли это были вы, никаких действий не требуется.',
+            time: '14:15',
+            unread: false
+          },
+          {
+            id: 3,
+            sender: 'Поддержка',
+            email: 'support@mailora.com',
+            subject: 'Полезные советы по настройке',
+            preview: 'Вы можете мгновенно переключать язык интерфейса между русским и английским в правом верхнем углу.',
+            body: 'Краткая справка:\n\n• Переключение языка RU / EN доступно на любом экране.\n• Для отправки письма нажмите кнопку «Написать» в левом меню.\n• По всем вопросам пишите на support@mailora.com.',
+            time: 'Вчера',
+            unread: false
+          }
+        ]
+      },
+      en: {
+        pageTitle: 'mailora.com',
+        tabLogin: 'Sign In',
+        tabRegister: 'Create Account',
+        labelEmail: 'Email address',
+        labelNewEmail: 'Desired address',
+        labelPassword: 'Password',
+        labelConfirmPassword: 'Confirm password',
+        placeholderUsername: 'username',
+        placeholderNewUsername: 'alexey',
+        placeholderPassword: '••••••••',
+        placeholderMinPassword: 'At least 6 characters',
+        forgotPassword: 'Forgot password?',
+        btnSignIn: 'Sign In',
+        btnCreateAccount: 'Create Account',
+        footerPrivacy: 'Privacy',
+        footerTerms: 'Terms',
+        footerSupport: 'Support',
+        btnClose: 'Close',
+        btnCancel: 'Cancel',
+        btnSend: 'Send',
+        btnSendReset: 'Send recovery code',
+        btnLogout: 'Sign out',
+        btnCompose: 'Compose',
+        btnBackToList: 'Back to list',
+        folderInbox: 'Inbox',
+        folderSent: 'Sent',
+        folderDrafts: 'Drafts',
+        composeTitle: 'New Message',
+        composeTo: 'To (e.g., info@mailora.com)',
+        composeSubject: 'Subject',
+        composeBody: 'Write your message...',
+        emptyFolder: 'No messages in this folder yet',
+        // Username status
+        statusChecking: 'Checking...',
+        statusAvailable: 'Available',
+        statusTaken: 'Taken',
+        statusInvalid: 'Letters & numbers only (min 3 chars)',
+        // Validation errors
+        errEmptyLogin: 'Please enter your username and password.',
+        errInvalidUser: 'Please enter a valid mailbox name.',
+        errShortPassword: 'Password must be at least 6 characters long.',
+        errPasswordMismatch: 'Passwords do not match.',
+        errTakenUsername: 'This username is already taken. Please choose another.',
+        forgotSentMsg: 'Recovery instructions have been sent to your backup contact.',
+        // Modals
+        modals: {
+          privacy: {
+            title: 'Privacy Policy',
+            body: 'All mailora.com user data is stored on secure servers located in the Russian Federation in full compliance with Federal Law 152-FZ. We never scan your correspondence for advertising and use modern encryption in transit and at rest.'
+          },
+          terms: {
+            title: 'Terms of Service',
+            body: 'mailora.com is provided for personal and business communication. Users agree not to use the service for unsolicited bulk emails (spam) and to comply with applicable laws.'
+          },
+          support: {
+            title: 'Support',
+            body: 'If you need help with your mailbox or account recovery, contact us at support@mailora.com. Average response time is 15 minutes.'
+          },
+          forgot: {
+            title: 'Account Recovery',
+            body: 'Enter your @mailora.com username to receive a one-time verification code.'
+          }
+        },
+        // Sample emails
+        sampleEmails: [
+          {
+            id: 1,
+            sender: 'mailora.com Team',
+            email: 'welcome@mailora.com',
+            subject: 'Welcome to mailora.com',
+            preview: 'Your new mailbox is ready. Nothing extra — just fast, clean, and reliable email.',
+            body: 'Hello!\n\nThank you for choosing mailora.com — a modern email service for Russia.\n\nYour mailbox is configured and protected. We stripped away all the clutter so you can focus on what matters.\n\nBest regards,\nThe mailora.com Team',
+            time: '15:40',
+            unread: true
+          },
+          {
+            id: 2,
+            sender: 'mailora Security',
+            email: 'security@mailora.com',
+            subject: 'Account protection is active',
+            preview: 'Signed in from a new device. TLS 1.3 encryption is enabled by default.',
+            body: 'Security Notification:\n\nTransport encryption (TLS 1.3) and spam filtering are active for your @mailora.com account.\n\nIf this was you, no further action is needed.',
+            time: '14:15',
+            unread: false
+          },
+          {
+            id: 3,
+            sender: 'Support',
+            email: 'support@mailora.com',
+            subject: 'Quick tips to get started',
+            preview: 'You can instantly switch the interface language between Russian and English in the top right corner.',
+            body: 'Quick Guide:\n\n• Instant RU / EN language switching is available on every screen.\n• Click "Compose" in the left sidebar to send a new message.\n• Need help? Reach us anytime at support@mailora.com.',
+            time: 'Yesterday',
+            unread: false
+          }
+        ]
+      }
+    };
+
+    // Глобальное состояние приложения
+    let currentLang = 'ru';
+    let currentAuthTab = 'login';
+    let currentUserEmail = '';
+    let currentFolder = 'inbox';
+    let sentEmails = [];
+    let currentModalType = null;
+    const reservedUsernames = ['admin', 'support', 'info', 'mail', 'postmaster', 'root'];
+
+    // Инициализация языка при загрузке
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      document.title = i18n[lang].pageTitle;
+
+      // Обновление активных кнопок RU / EN на обоих экранах
+      ['lang-btn-', 'wm-lang-btn-'].forEach(prefix => {
+        const ruBtn = document.getElementById(prefix + 'ru');
+        const enBtn = document.getElementById(prefix + 'en');
+        if (lang === 'ru') {
+          ruBtn.className = 'px-2.5 py-1.5 rounded-md transition-all duration-150 bg-burgundy text-white font-semibold';
+          enBtn.className = 'px-2.5 py-1.5 rounded-md transition-all duration-150 text-ink-secondary hover:text-ink-primary';
+        } else {
+          enBtn.className = 'px-2.5 py-1.5 rounded-md transition-all duration-150 bg-burgundy text-white font-semibold';
+          ruBtn.className = 'px-2.5 py-1.5 rounded-md transition-all duration-150 text-ink-secondary hover:text-ink-primary';
+        }
+      });
+
+      // Перевод всех элементов с атрибутом data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[lang][key]) {
+          el.textContent = i18n[lang][key];
+        }
+      });
+
+      // Перевод плейсхолдеров
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (i18n[lang][key]) {
+          el.placeholder = i18n[lang][key];
+        }
+      });
+
+      // Пересчёт статуса доступности имени при регистрации, если поле заполнено
+      const regInput = document.getElementById('reg-username');
+      if (regInput && regInput.value.trim().length > 0) {
+        checkUsernameAvailability(regInput.value);
+      }
+
+      // Обновление открытого модального окна, если оно активно
+      if (currentModalType && i18n[lang].modals[currentModalType]) {
+        document.getElementById('modal-title').textContent = i18n[lang].modals[currentModalType].title;
+        document.getElementById('modal-body').textContent = i18n[lang].modals[currentModalType].body;
+      }
+
+      // Перерисовка списка писем в веб-клиенте
+      if (!document.getElementById('webmail-screen').classList.contains('hidden')) {
+        updateFolderUI();
+        renderMailList();
+      }
+    }
+
+    // Переключение вкладок Вход / Регистрация
+    function switchAuthTab(tab) {
+      currentAuthTab = tab;
+      hideAlert();
+
+      const tabLogin = document.getElementById('tab-login');
+      const tabRegister = document.getElementById('tab-register');
+      const formLogin = document.getElementById('form-login');
+      const formRegister = document.getElementById('form-register');
+
+      if (tab === 'login') {
+        tabLogin.className = 'py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-white text-ink-primary shadow-2xs';
+        tabLogin.setAttribute('aria-selected', 'true');
+        tabRegister.className = 'py-2 text-sm font-medium rounded-lg transition-all duration-150 text-ink-secondary hover:text-ink-primary';
+        tabRegister.setAttribute('aria-selected', 'false');
+
+        formRegister.classList.add('hidden');
+        formLogin.classList.remove('hidden');
+      } else {
+        tabRegister.className = 'py-2 text-sm font-medium rounded-lg transition-all duration-150 bg-white text-ink-primary shadow-2xs';
+        tabRegister.setAttribute('aria-selected', 'true');
+        tabLogin.className = 'py-2 text-sm font-medium rounded-lg transition-all duration-150 text-ink-secondary hover:text-ink-primary';
+        tabLogin.setAttribute('aria-selected', 'false');
+
+        formLogin.classList.add('hidden');
+        formRegister.classList.remove('hidden');
+      }
+    }
+
+    // Показать/скрыть пароль
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+
+      btn.innerHTML = isPassword
+        ? `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+           </svg>`
+        : `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+           </svg>`;
+    }
+
+    // Проверка доступности имени при регистрации в реальном времени
+    function checkUsernameAvailability(rawVal) {
+      const statusEl = document.getElementById('username-status');
+      const cleaned = rawVal.trim().toLowerCase().replace(/@mailora\.com$/i, '');
+
+      if (!cleaned) {
+        statusEl.textContent = '';
+        return false;
+      }
+
+      const validRegex = /^[a-z0-9._-]{3,30}$/;
+      if (!validRegex.test(cleaned)) {
+        statusEl.textContent = i18n[currentLang].statusInvalid;
+        statusEl.className = 'text-[11px] font-medium text-ink-muted';
+        return false;
+      }
+
+      if (reservedUsernames.includes(cleaned)) {
+        statusEl.textContent = i18n[currentLang].statusTaken;
+        statusEl.className = 'text-[11px] font-medium text-burgundy';
+        return false;
+      }
+
+      statusEl.textContent = '✓ ' + i18n[currentLang].statusAvailable;
+      statusEl.className = 'text-[11px] font-medium text-emerald-700';
+      return true;
+    }
+
+    // Показ уведомления в карточке авторизации
+    function showAlert(message) {
+      const alertBox = document.getElementById('auth-alert');
+      alertBox.textContent = message;
+      alertBox.className = 'mb-4 px-3.5 py-2.5 rounded-xl text-xs font-medium border bg-burgundy-tint border-burgundy-border text-burgundy animate-fade-up';
+      alertBox.classList.remove('hidden');
+    }
+
+    function hideAlert() {
+      document.getElementById('auth-alert').classList.add('hidden');
+    }
+
+    // Обработка входа
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      hideAlert();
+
+      const rawUser = document.getElementById('login-username').value.trim().toLowerCase().replace(/@mailora\.com$/i, '');
+      const password = document.getElementById('login-password').value;
+
+      if (!rawUser || !password) {
+        showAlert(i18n[currentLang].errEmptyLogin);
+        return;
+      }
+
+      enterWebmail(`${rawUser}@mailora.com`);
+    }
+
+    // Обработка регистрации
+    function handleRegisterSubmit(e) {
+      e.preventDefault();
+      hideAlert();
+
+      const rawUser = document.getElementById('reg-username').value.trim().toLowerCase().replace(/@mailora\.com$/i, '');
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-password-confirm').value;
+
+      if (!rawUser || !/^[a-z0-9._-]{3,30}$/.test(rawUser)) {
+        showAlert(i18n[currentLang].errInvalidUser);
+        return;
+      }
+
+      if (reservedUsernames.includes(rawUser)) {
+        showAlert(i18n[currentLang].errTakenUsername);
+        return;
+      }
+
+      if (password.length < 6) {
+        showAlert(i18n[currentLang].errShortPassword);
+        return;
+      }
+
+      if (password !== confirm) {
+        showAlert(i18n[currentLang].errPasswordMismatch);
+        return;
+      }
+
+      enterWebmail(`${rawUser}@mailora.com`);
+    }
+
+    // Вход в интерактивный веб-клиент почты
+    function enterWebmail(email) {
+      currentUserEmail = email;
+      document.getElementById('active-user-email').textContent = email;
+      const mobileEmailEl = document.getElementById('mobile-active-email');
+      if (mobileEmailEl) mobileEmailEl.textContent = email;
+
+      document.getElementById('auth-screen').classList.add('hidden');
+      const wmScreen = document.getElementById('webmail-screen');
+      wmScreen.classList.remove('hidden');
+      wmScreen.classList.add('flex');
+
+      selectFolder('inbox');
+    }
+
+    // Выход обратно на главный экран
+    function logoutUser() {
+      currentUserEmail = '';
+      document.getElementById('login-password').value = '';
+      document.getElementById('reg-password').value = '';
+      document.getElementById('reg-password-confirm').value = '';
+      hideAlert();
+
+      const wmScreen = document.getElementById('webmail-screen');
+      wmScreen.classList.add('hidden');
+      wmScreen.classList.remove('flex');
+      document.getElementById('auth-screen').classList.remove('hidden');
+    }
+
+    function resetToAuth(e) {
+      e.preventDefault();
+      switchAuthTab('login');
+      hideAlert();
+    }
+
+    // Работа с папками веб-клиента
+    function selectFolder(folder) {
+      currentFolder = folder;
+      closeMailReader();
+      updateFolderUI();
+      renderMailList();
+    }
+
+    function updateFolderUI() {
+      const folders = ['inbox', 'sent', 'drafts'];
+      folders.forEach(f => {
+        const btn = document.getElementById('folder-' + f);
+        if (f === currentFolder) {
+          btn.className = 'shrink-0 flex-1 md:flex-none flex items-center justify-between gap-2 px-3 py-2.5 md:py-2 rounded-xl text-xs sm:text-sm font-medium bg-burgundy-tint text-burgundy border border-burgundy-border/60 transition-colors cursor-pointer';
+        } else {
+          btn.className = 'shrink-0 flex-1 md:flex-none flex items-center justify-between gap-2 px-3 py-2.5 md:py-2 rounded-xl text-xs sm:text-sm font-medium text-ink-secondary hover:bg-white hover:text-ink-primary transition-colors cursor-pointer';
+        }
+      });
+
+      const titleMap = {
+        inbox: i18n[currentLang].folderInbox,
+        sent: i18n[currentLang].folderSent,
+        drafts: i18n[currentLang].folderDrafts
+      };
+      document.getElementById('current-folder-title').textContent = titleMap[currentFolder];
+      document.getElementById('inbox-count').textContent = i18n[currentLang].sampleEmails.length;
+      document.getElementById('sent-count').textContent = sentEmails.length;
+    }
+
+    function renderMailList() {
+      const container = document.getElementById('mail-list-container');
+      let list = [];
+
+      if (currentFolder === 'inbox') {
+        list = i18n[currentLang].sampleEmails;
+      } else if (currentFolder === 'sent') {
+        list = sentEmails;
+      } else {
+        list = [];
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="h-full min-h-[360px] flex flex-col items-center justify-center text-center p-6 text-ink-muted">
+            <svg class="w-8 h-8 mb-2.5 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2.5"></rect>
+              <path d="M3 7.5L12 13.5L21 7.5"></path>
+            </svg>
+            <p class="text-xs">${i18n[currentLang].emptyFolder}</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map((mail, index) => `
+        <button type="button" onclick="openMailItem(${index})" class="w-full text-left px-5 py-4 hover:bg-surface-base/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 cursor-pointer group">
+          <div class="flex items-start sm:items-center gap-3 min-w-0">
+            <span class="mt-1.5 sm:mt-0 w-2 h-2 rounded-full shrink-0 ${mail.unread ? 'bg-burgundy' : 'bg-transparent'}"></span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-sm ${mail.unread ? 'font-semibold text-ink-primary' : 'font-medium text-ink-primary'} truncate">
+                  ${escapeHtml(mail.sender)}
+                </span>
+              </div>
+              <div class="text-xs ${mail.unread ? 'font-semibold text-ink-primary' : 'text-ink-secondary'} truncate mt-0.5">
+                ${escapeHtml(mail.subject)} <span class="font-normal text-ink-muted">— ${escapeHtml(mail.preview)}</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-[11px] text-ink-muted shrink-0 pl-5 sm:pl-3">${escapeHtml(mail.time)}</span>
+        </button>
+      `).join('');
+    }
+
+    function openMailItem(index) {
+      const list = currentFolder === 'inbox' ? i18n[currentLang].sampleEmails : sentEmails;
+      const mail = list[index];
+      if (!mail) return;
+
+      mail.unread = false;
+
+      document.getElementById('mail-list-container').classList.add('hidden');
+      const reader = document.getElementById('mail-reader-container');
+      reader.classList.remove('hidden');
+      reader.classList.add('flex');
+
+      document.getElementById('reader-subject').textContent = mail.subject;
+      document.getElementById('reader-sender').textContent = mail.sender;
+      document.getElementById('reader-email').textContent = mail.email;
+      document.getElementById('reader-time').textContent = mail.time;
+      document.getElementById('reader-avatar').textContent = mail.sender.charAt(0).toUpperCase();
+      document.getElementById('reader-body').textContent = mail.body;
+    }
+
+    function closeMailReader() {
+      const reader = document.getElementById('mail-reader-container');
+      reader.classList.add('hidden');
+      reader.classList.remove('flex');
+      document.getElementById('mail-list-container').classList.remove('hidden');
+      renderMailList();
+    }
+
+    // Модальные окна
+    function openModal(type) {
+      currentModalType = type;
+      const modalData = i18n[currentLang].modals[type];
+      if (!modalData) return;
+
+      document.getElementById('modal-compose-content').classList.add('hidden');
+      document.getElementById('modal-info-content').classList.remove('hidden');
+
+      document.getElementById('modal-title').textContent = modalData.title;
+      document.getElementById('modal-body').textContent = modalData.body;
+
+      const forgotForm = document.getElementById('forgot-form');
+      const closeFooter = document.getElementById('modal-close-footer');
+      const forgotFeedback = document.getElementById('forgot-feedback');
+
+      forgotFeedback.classList.add('hidden');
+      document.getElementById('forgot-username').value = '';
+
+      if (type === 'forgot') {
+        forgotForm.classList.remove('hidden');
+        closeFooter.classList.add('hidden');
+      } else {
+        forgotForm.classList.add('hidden');
+        closeFooter.classList.remove('hidden');
+      }
+
+      document.getElementById('modal-backdrop').classList.remove('hidden');
+    }
+
+    function openComposeModal() {
+      currentModalType = 'compose';
+      document.getElementById('modal-info-content').classList.add('hidden');
+      document.getElementById('modal-compose-content').classList.remove('hidden');
+      document.getElementById('compose-to').value = '';
+      document.getElementById('compose-subject').value = '';
+      document.getElementById('compose-body').value = '';
+      document.getElementById('modal-backdrop').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      currentModalType = null;
+      document.getElementById('modal-backdrop').classList.add('hidden');
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target === document.getElementById('modal-backdrop')) {
+        closeModal();
+      }
+    }
+
+    function handleForgotSubmit(e) {
+      e.preventDefault();
+      const feedback = document.getElementById('forgot-feedback');
+      feedback.textContent = i18n[currentLang].forgotSentMsg;
+      feedback.classList.remove('hidden');
+    }
+
+    function handleSendMail(e) {
+      e.preventDefault();
+      const to = document.getElementById('compose-to').value.trim();
+      const subject = document.getElementById('compose-subject').value.trim();
+      const body = document.getElementById('compose-body').value.trim();
+
+      if (!to || !subject || !body) return;
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      sentEmails.unshift({
+        id: Date.now(),
+        sender: currentLang === 'ru' ? `Кому: ${to}` : `To: ${to}`,
+        email: to,
+        subject: subject,
+        preview: body.slice(0, 80),
+        body: body,
+        time: timeStr,
+        unread: false
+      });
+
+      closeModal();
+      selectFolder('sent');
+    }
+
+    // Экранирование HTML для безопасности
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Закрытие модального окна по клавише Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // Инициализация языка по умолчанию (RU)
+    setLanguage('ru');
+  </script>
+</body>
+</html>
